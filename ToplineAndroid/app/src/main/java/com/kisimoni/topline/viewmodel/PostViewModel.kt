@@ -29,6 +29,9 @@ import java.io.IOException
 data class PostUiState(
     val isLoading: Boolean = false,
     val posts: List<PostItem> = emptyList(),
+    val nextPostsCursor: String? = null,
+    val hasMorePosts: Boolean = true,
+    val isLoadingMorePosts: Boolean = false,
     val ownPosts: List<PostItem> = emptyList(),
     val ownPostsCount: Int = 0,
     val ownPostsError: String? = null,
@@ -37,6 +40,9 @@ data class PostUiState(
     val ownProfileCountsError: String? = null,
     val errorMessage: String? = null,
     val followingPosts: List<PostItem> = emptyList(),
+    val nextFollowingPostsCursor: String? = null,
+    val hasMoreFollowingPosts: Boolean = true,
+    val isLoadingMoreFollowingPosts: Boolean = false,
     val isFollowingLoading: Boolean = false,
     val followingErrorMessage: String? = null,
     val savedPostIds: Set<String> = emptySet(),
@@ -118,6 +124,8 @@ private fun List<PostItem>.withSharesCount(postId: String, count: Int): List<Pos
 class PostViewModel(
     private val postRepository: PostRepository,
 ) : ViewModel() {
+    private var loadingMorePosts = false
+    private var loadingMoreFollowingPosts = false
     private val _uiState = MutableStateFlow(PostUiState())
     val uiState: StateFlow<PostUiState> = _uiState.asStateFlow()
 
@@ -143,18 +151,30 @@ class PostViewModel(
         if (token.isNullOrBlank()) {
             _uiState.value = _uiState.value.copy(
                 followingPosts = emptyList(),
+                nextFollowingPostsCursor = null,
+                hasMoreFollowingPosts = false,
+                isLoadingMoreFollowingPosts = false,
                 isFollowingLoading = false,
                 followingErrorMessage = "Sign in to view videos from accounts you follow.",
             )
             return
         }
 
+        loadingMoreFollowingPosts = false
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isFollowingLoading = true, followingErrorMessage = null)
+            _uiState.value = _uiState.value.copy(
+                isFollowingLoading = true,
+                followingErrorMessage = null,
+                nextFollowingPostsCursor = null,
+                hasMoreFollowingPosts = true,
+                isLoadingMoreFollowingPosts = false,
+            )
             try {
                 val response = postRepository.getFollowingPosts(token)
                 _uiState.value = _uiState.value.copy(
                     followingPosts = response.posts,
+                    nextFollowingPostsCursor = response.nextCursor,
+                    hasMoreFollowingPosts = response.hasMore,
                     isFollowingLoading = false,
                 )
             } catch (e: Exception) {
@@ -162,6 +182,33 @@ class PostViewModel(
                     isFollowingLoading = false,
                     followingErrorMessage = errorMessage(e, "Unable to load videos from accounts you follow."),
                 )
+            }
+        }
+    }
+
+    fun loadMoreFollowingPosts(token: String?) {
+        if (token.isNullOrBlank() || loadingMoreFollowingPosts) return
+        val state = _uiState.value
+        val cursor = state.nextFollowingPostsCursor ?: return
+        if (!state.hasMoreFollowingPosts) return
+        loadingMoreFollowingPosts = true
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingMoreFollowingPosts = true)
+            try {
+                val response = postRepository.getFollowingPosts(token, cursor)
+                _uiState.value = _uiState.value.copy(
+                    followingPosts = (_uiState.value.followingPosts + response.posts).distinctBy { it.id },
+                    nextFollowingPostsCursor = response.nextCursor,
+                    hasMoreFollowingPosts = response.hasMore,
+                    isLoadingMoreFollowingPosts = false,
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoadingMoreFollowingPosts = false,
+                    followingErrorMessage = errorMessage(e, "Unable to load more videos from accounts you follow."),
+                )
+            } finally {
+                loadingMoreFollowingPosts = false
             }
         }
     }
@@ -441,12 +488,21 @@ class PostViewModel(
     }
 
     fun loadPosts(token: String? = null) {
+        loadingMorePosts = false
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                nextPostsCursor = null,
+                hasMorePosts = true,
+                isLoadingMorePosts = false,
+            )
             try {
                 val response = postRepository.getPosts(token)
                 _uiState.value = _uiState.value.copy(
                     posts = response.posts,
+                    nextPostsCursor = response.nextCursor,
+                    hasMorePosts = response.hasMore,
                     isLoading = false,
                 )
             } catch (e: Exception) {
@@ -454,6 +510,33 @@ class PostViewModel(
                     isLoading = false,
                     errorMessage = errorMessage(e, "Unable to load feed."),
                 )
+            }
+        }
+    }
+
+    fun loadMorePosts(token: String? = null) {
+        if (loadingMorePosts) return
+        val state = _uiState.value
+        val cursor = state.nextPostsCursor ?: return
+        if (!state.hasMorePosts) return
+        loadingMorePosts = true
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingMorePosts = true)
+            try {
+                val response = postRepository.getPosts(token, cursor)
+                _uiState.value = _uiState.value.copy(
+                    posts = (_uiState.value.posts + response.posts).distinctBy { it.id },
+                    nextPostsCursor = response.nextCursor,
+                    hasMorePosts = response.hasMore,
+                    isLoadingMorePosts = false,
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoadingMorePosts = false,
+                    errorMessage = errorMessage(e, "Unable to load more videos."),
+                )
+            } finally {
+                loadingMorePosts = false
             }
         }
     }
