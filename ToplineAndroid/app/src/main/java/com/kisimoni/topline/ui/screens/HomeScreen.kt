@@ -78,6 +78,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -1620,6 +1623,17 @@ private fun VideoPreview(
     onSeekRequestHandled: (Long) -> Unit,
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isLifecycleStarted by remember(lifecycleOwner) {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
+    }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            isLifecycleStarted = event.targetState.isAtLeast(Lifecycle.State.STARTED)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     val playbackUrl = remember(videoUrl) { cloudinaryPlaybackUrl(videoUrl) }
     fun mediaItem(url: String): MediaItem {
         val builder = MediaItem.Builder().setUri(url)
@@ -1637,7 +1651,8 @@ private fun VideoPreview(
     }
     var playbackError by remember(videoUrl) { mutableStateOf(false) }
     var originalUrlFallbackUsed by remember(videoUrl) { mutableStateOf(false) }
-    var isPlaying by remember(videoUrl) { mutableStateOf(isActive) }
+    var isPlaying by remember(videoUrl) { mutableStateOf(isActive && isLifecycleStarted) }
+    var isUserPaused by remember(videoUrl) { mutableStateOf(false) }
     var isBuffering by remember(videoUrl) { mutableStateOf(true) }
     var heartBurstId by remember(videoUrl) { mutableStateOf(0) }
     var heartBurstX by remember(videoUrl) { mutableStateOf(0.5f) }
@@ -1675,8 +1690,8 @@ private fun VideoPreview(
                 // watching without an extra tap, matching the expected TikTok
                 // style playback behavior.
                 repeatMode = Player.REPEAT_MODE_ONE
-                prepare()
-                playWhenReady = isActive
+                // Prepare only the visible page; eagerly preparing neighbouring
+                // pages can exhaust hardware video decoders on some devices.
             }
     }
 
@@ -1687,15 +1702,30 @@ private fun VideoPreview(
             playbackError = false
             isBuffering = true
             exoPlayer.setMediaItem(mediaItem(videoUrl))
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = isActive
+            if (isActive && isLifecycleStarted && !isUserPaused) {
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+            } else {
+                exoPlayer.playWhenReady = false
+            }
         }
     }
 
-    LaunchedEffect(exoPlayer, isActive, seekRequest) {
-        exoPlayer.playWhenReady = isActive
-        if (!isActive) isPlaying = false
-        if (isActive) {
+    LaunchedEffect(exoPlayer, isActive, isLifecycleStarted, isUserPaused, seekRequest) {
+        if (!isActive) {
+            exoPlayer.playWhenReady = false
+            isPlaying = false
+            isUserPaused = false
+            return@LaunchedEffect
+        }
+        val shouldPlay = isLifecycleStarted && !isUserPaused
+        if (shouldPlay) {
+            if (exoPlayer.playbackState == Player.STATE_IDLE) exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+        } else {
+            exoPlayer.playWhenReady = false
+        }
+        if (isActive && isLifecycleStarted) {
             onPlaybackProgress(0f)
             seekRequest?.let { (requestId, fraction) ->
                 val duration = exoPlayer.duration
@@ -1707,8 +1737,8 @@ private fun VideoPreview(
         }
     }
 
-    LaunchedEffect(exoPlayer, isActive) {
-        if (!isActive) return@LaunchedEffect
+    LaunchedEffect(exoPlayer, isActive, isLifecycleStarted) {
+        if (!isActive || !isLifecycleStarted) return@LaunchedEffect
         while (true) {
             val duration = exoPlayer.duration
             if (duration > 0) {
@@ -1728,13 +1758,14 @@ private fun VideoPreview(
         Modifier.fillMaxSize().pointerInput(videoUrl, isActive) {
             detectTapGestures(
                 onTap = {
-                    if (isActive) {
-                        if (exoPlayer.playbackState == Player.STATE_ENDED) {
-                            exoPlayer.seekTo(0)
-                            exoPlayer.play()
-                        } else if (exoPlayer.isPlaying) {
+                    if (isActive && isLifecycleStarted) {
+                        if (exoPlayer.isPlaying) {
+                            isUserPaused = true
                             exoPlayer.pause()
                         } else {
+                            isUserPaused = false
+                            if (exoPlayer.playbackState == Player.STATE_ENDED) exoPlayer.seekTo(0)
+                            if (exoPlayer.playbackState == Player.STATE_IDLE) exoPlayer.prepare()
                             exoPlayer.play()
                         }
                     }
@@ -1798,8 +1829,12 @@ private fun VideoPreview(
                         playbackError = false
                         exoPlayer.seekTo(0)
                         exoPlayer.setMediaItem(mediaItem(if (originalUrlFallbackUsed) videoUrl else playbackUrl))
-                        exoPlayer.prepare()
-                        exoPlayer.playWhenReady = isActive
+                        if (isActive && isLifecycleStarted && !isUserPaused) {
+                            exoPlayer.prepare()
+                            exoPlayer.playWhenReady = true
+                        } else {
+                            exoPlayer.playWhenReady = false
+                        }
                     },
                 ) {
                     Text("Try again", color = Color.White)
