@@ -34,10 +34,24 @@ jobs:
       - name: Build debug APK
         working-directory: ToplineAndroid
         run: chmod +x gradlew && ./gradlew --no-daemon :app:assembleDebug
+      - name: Locate and stage debug APK
+        shell: bash
+        run: |
+          echo "Searching for generated APK files..."
+          find ToplineAndroid -type f -name "*.apk" -print
+          APK_PATH="$(find ToplineAndroid -type f -path "*/build/outputs/apk/*/*.apk" -print -quit)"
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::Gradle reported a successful build, but no APK file was found under ToplineAndroid."
+            exit 1
+          fi
+          mkdir -p artifacts
+          cp "$APK_PATH" artifacts/topline4-debug.apk
+          echo "Staged APK: $APK_PATH"
+          ls -lh artifacts/topline4-debug.apk
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: topline4-debug-apk
-          path: ToplineAndroid/app/build/outputs/apk/debug/app-debug.apk
+          path: artifacts/topline4-debug.apk
           if-no-files-found: error
           retention-days: 14
