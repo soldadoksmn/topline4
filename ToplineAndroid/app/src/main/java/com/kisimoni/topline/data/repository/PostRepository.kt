@@ -157,7 +157,7 @@ class PostRepository(
         audience: String = "public",
         allowComments: Boolean = true,
     ): CreatePostResponse = withContext(Dispatchers.IO) {
-        apiService.createPost(token, CreatePostRequest(text, audience, allowComments))
+        apiService.createPost(bearerAuthorization(token), CreatePostRequest(text, audience, allowComments))
     }
 
     suspend fun getMyProfileCounts(token: String): ProfileCountsResponse = withContext(Dispatchers.IO) {
@@ -344,7 +344,7 @@ class PostRepository(
                 )
             }
             apiService.createPostWithMedia(
-                token,
+                bearerAuthorization(token),
                 textBody,
                 visibilityBody,
                 allowCommentsBody,
