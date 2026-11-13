@@ -252,6 +252,20 @@ fun HomeScreen(
         pagerState.scrollToPage(0)
     }
 
+    LaunchedEffect(pagerState.currentPage, feedPosts.size, showFollowing, searchQuery) {
+        if (
+            searchQuery.isBlank() &&
+            feedPosts.isNotEmpty() &&
+            pagerState.currentPage >= (feedPosts.lastIndex - 4).coerceAtLeast(0)
+        ) {
+            if (showFollowing) {
+                postViewModel.loadMoreFollowingPosts(authViewModel.tokenOrNull())
+            } else {
+                postViewModel.loadMorePosts(authViewModel.tokenOrNull())
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
