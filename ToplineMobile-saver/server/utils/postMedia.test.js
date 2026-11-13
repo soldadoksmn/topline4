@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
 	getPostVideoUrl,
+	isCloudinaryStorageConfigured,
 	isVideoFile,
 	looksLikeVideoUrl,
 } from "./postMedia.js";
@@ -29,4 +30,18 @@ test("recognizes video URLs and legacy video records", () => {
 		"https://cdn.example/current.mp4",
 	);
 	assert.equal(getPostVideoUrl({ image: "https://cdn.example/photo.jpg" }), "");
+});
+
+
+test("requires all Cloudinary credentials before accepting media uploads", () => {
+	assert.equal(isCloudinaryStorageConfigured({}), false);
+	assert.equal(isCloudinaryStorageConfigured({
+		CLOUDINARY_CLOUD_NAME: "demo",
+		CLOUDINARY_API_KEY: "key",
+	}), false);
+	assert.equal(isCloudinaryStorageConfigured({
+		CLOUDINARY_CLOUD_NAME: " demo ",
+		CLOUDINARY_API_KEY: " key ",
+		CLOUDINARY_API_SECRET: " secret ",
+	}), true);
 });
