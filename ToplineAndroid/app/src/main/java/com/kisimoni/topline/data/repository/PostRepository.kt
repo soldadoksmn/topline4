@@ -62,12 +62,12 @@ class PostRepository(
     private val apiService: ApiService = ApiService.create(userPreferences),
     private val context: Context? = null,
 ) {
-    suspend fun getPosts(token: String?): PostListResponse = withContext(Dispatchers.IO) {
-        apiService.getPosts(token?.let(::bearerAuthorization))
+    suspend fun getPosts(token: String?, cursor: String? = null): PostListResponse = withContext(Dispatchers.IO) {
+        apiService.getPosts(token?.let(::bearerAuthorization), cursor)
     }
 
-    suspend fun getFollowingPosts(token: String): PostListResponse = withContext(Dispatchers.IO) {
-        apiService.getFollowingPosts(bearerAuthorization(token))
+    suspend fun getFollowingPosts(token: String, cursor: String? = null): PostListResponse = withContext(Dispatchers.IO) {
+        apiService.getFollowingPosts(bearerAuthorization(token), cursor)
     }
 
     suspend fun getNotifications(): NotificationsResponse = withContext(Dispatchers.IO) {
