@@ -10,7 +10,7 @@ Topline is a social video and community application. This repository contains th
 
 ## Video feed
 
-The Home screen uses a vertically paged feed and the existing Media3 player lifecycle. The production For You feed now uses API posts only; placeholder/demo videos have been removed. Upload remains connected to the existing post creation flow.
+The Home screen uses a vertically paged, cursor-paginated video feed for For You and Following. It loads another page as the viewer approaches the end, uses API video posts only, and has no placeholder/demo videos. Media3 playback loops the active video, pauses when the app leaves the foreground or the page changes, handles audio focus, and releases players when feed items leave composition. Upload remains connected to the post creation flow, including server-side Cloudinary/S3 storage.
 
 ## Configuration
 
