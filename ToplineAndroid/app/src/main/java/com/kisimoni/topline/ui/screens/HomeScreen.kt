@@ -129,37 +129,8 @@ fun HomeScreen(
     var downloadStatus by remember { mutableStateOf<String?>(null) }
     var downloadProgress by remember { mutableStateOf<Float?>(null) }
     var permissionPendingDownload by remember { mutableStateOf<PostItem?>(null) }
-    val samplePosts = remember {
-        listOf(
-            PostItem(
-                id = "sample-flower",
-                author = PostAuthor(name = "Topline", username = "topline"),
-                text = "A sample clip for testing video playback.",
-                video = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-                likesCount = 245,
-            ),
-            PostItem(
-                id = "sample-sintel",
-                author = PostAuthor(name = "Sintel", username = "sintel"),
-                text = "Animated trailer sample.",
-                video = "https://media.w3.org/2010/05/sintel/trailer.mp4",
-                likesCount = 128,
-            ),
-            PostItem(
-                id = "sample-bunny",
-                author = PostAuthor(name = "Marcus Rivera", username = "marcus_creates"),
-                text = "Late night vibes in Neo Tokyo 🚀 Tried the new hyperlapse trend! #urban #cinematic #fyp #viral",
-                // Keep the feed visually useful while the remote video buffers.
-                // This is the same full-bleed creator-style treatment as the
-                // supplied TikTok reference design.
-                image = "https://lh3.googleusercontent.com/aida-public/AB6AXuDeIzjZRydtWUe_CSeqPRSwjJfeEBmgVse5-RLLxskWg0QVkCtFuuSr0aGChZXY0p4HbbKlRan1JvZTe4ypf-c3NRJCkHjIWOOj-ZO9wL4nkzkPdcFjttpNlc-rlvNth4Y21tQLcuwQP0Xey5bYVmf2p8x4aVoYyOsvhu3pIxaRheoMKCG4WialT0qP-Sx9Cr61r7a-1_GyidASDJLodryAh6VmOANSacIsQmyJT7Bql8XR-JWs4kkd",
-                likesCount = 1_400_000,
-                commentsCount = 24_800,
-                savesCount = 182_000,
-                sharesCount = 49_100,
-            ),
-        )
-    }
+    // The For You feed uses real posts returned by the API; no demo videos.
+    val samplePosts = emptyList<PostItem>()
     var showFollowing by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
@@ -167,7 +138,7 @@ fun HomeScreen(
     var searchSubmitted by remember { mutableStateOf(false) }
     var recentSearches by remember { mutableStateOf(emptyList<String>()) }
     val context = LocalContext.current
-    val sourcePosts = if (showFollowing) uiState.followingPosts else uiState.posts + samplePosts
+    val sourcePosts = if (showFollowing) uiState.followingPosts else uiState.posts
     val searchSuggestions = remember(sourcePosts) {
         sourcePosts.sortedByDescending { it.likesCount }
             .flatMap { listOf(it.author.name, it.text.takeIf(String::isNotBlank).orEmpty()) }
