@@ -1,0 +1,17 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.pem
+*.p12
+*.p8
+*.key
+*firebase-adminsdk*.json
+
+# Build output and dependencies
+node_modules/
+.gradle/
+build/
+.DS_Store
