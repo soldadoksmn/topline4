@@ -86,10 +86,16 @@ interface ApiService {
     ): UserResponse
 
     @GET("posts")
-    suspend fun getPosts(@Header("Authorization") token: String? = null): PostListResponse
+    suspend fun getPosts(
+        @Header("Authorization") token: String? = null,
+        @Query("cursor") cursor: String? = null,
+    ): PostListResponse
 
     @GET("posts/following")
-    suspend fun getFollowingPosts(@Header("Authorization") token: String): PostListResponse
+    suspend fun getFollowingPosts(
+        @Header("Authorization") token: String,
+        @Query("cursor") cursor: String? = null,
+    ): PostListResponse
 
     @GET("posts/mine")
     suspend fun getMyPosts(@Header("Authorization") token: String): PostListResponse
