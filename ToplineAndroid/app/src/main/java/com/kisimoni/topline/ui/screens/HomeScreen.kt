@@ -129,8 +129,6 @@ fun HomeScreen(
     var downloadStatus by remember { mutableStateOf<String?>(null) }
     var downloadProgress by remember { mutableStateOf<Float?>(null) }
     var permissionPendingDownload by remember { mutableStateOf<PostItem?>(null) }
-    // The For You feed uses real posts returned by the API; no demo videos.
-    val samplePosts = emptyList<PostItem>()
     var showFollowing by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
