@@ -68,6 +68,10 @@ const postSchema = new mongoose.Schema(
   }
 );
 
+// Support stable newest-first cursor pagination for both public and following feeds.
+postSchema.index({ createdAt: -1, _id: -1 });
+postSchema.index({ author: 1, createdAt: -1, _id: -1 });
+
 const Post = mongoose.model("Post", postSchema);
 
 export default Post;
