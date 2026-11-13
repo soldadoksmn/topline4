@@ -15,6 +15,7 @@ import { createNotification } from "../utils/createNotification.js";
 import { canViewPost } from "../utils/postAccess.js";
 import {
 	getPostVideoUrl,
+	isCloudinaryStorageConfigured,
 	isVideoFile,
 	looksLikeVideoUrl,
 	videoMimeTypePattern,
@@ -89,7 +90,7 @@ const upload = multer({
 ]);
 
 cloudinary.config({
-	cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "drqqahmxt",
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 	api_key: process.env.CLOUDINARY_API_KEY,
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -419,7 +420,7 @@ router.post("/", upload, async (req, res) => {
 			if (useS3 && !isS3StorageConfigured()) {
 				return res.status(503).json({ message: "S3 media storage is not configured on the server." });
 			}
-			if (!useS3 && (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)) {
+			if (!useS3 && !isCloudinaryStorageConfigured()) {
 				return res.status(503).json({ message: "Media uploads are not configured on the server." });
 			}
 
