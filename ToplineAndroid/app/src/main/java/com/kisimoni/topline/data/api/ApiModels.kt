@@ -180,6 +180,8 @@ data class PostItem(
 data class PostListResponse(
     @SerialName("posts") val posts: List<PostItem> = emptyList(),
     @SerialName("postCount") val postCount: Int = 0,
+    @SerialName("hasMore") val hasMore: Boolean = false,
+    @SerialName("nextCursor") val nextCursor: String? = null,
 )
 
 @Serializable
