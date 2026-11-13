@@ -13,6 +13,7 @@ import SavedPost from "../models/SavedPost.js";
 import User from "../models/User.js";
 import { createNotification } from "../utils/createNotification.js";
 import { canViewPost } from "../utils/postAccess.js";
+import { decodeFeedCursor, encodeFeedCursor } from "../utils/feedCursor.js";
 import {
 	getPostVideoUrl,
 	isCloudinaryStorageConfigured,
@@ -23,6 +24,7 @@ import {
 } from "../utils/postMedia.js";
 
 const router = express.Router();
+const FEED_PAGE_SIZE = 20;
 
 const toClientPost = (post) => {
 	const value = typeof post.toObject === "function" ? post.toObject() : post;
@@ -231,36 +233,48 @@ router.get("/following", async (req, res) => {
 			return res.status(401).json({ message: "Your session has expired." });
 		}
 
+		const cursor = decodeFeedCursor(req.query.cursor);
+		if (req.query.cursor && !cursor) {
+			return res.status(400).json({ message: "Invalid feed cursor." });
+		}
 		const followingIds = await Friend.distinct("following", { follower: userId });
 		if (!followingIds.length) {
-			return res.json({ posts: [], postCount: 0 });
+			return res.json({ posts: [], postCount: 0, hasMore: false, nextCursor: null });
 		}
 
-		const records = await Post.find({
-			author: { $in: followingIds },
-			$and: [
-				{
-					$or: [
-						{ video: { $regex: /\S/ } },
-						{ mediaType: videoMimeTypePattern },
-						{ mediaUrl: videoUrlPattern },
-						{ image: videoUrlPattern },
-					],
-				},
-				{
-					$or: [
-						{ visibility: { $in: ["public", "followers"] } },
-						{ visibility: { $exists: false } },
-					],
-				},
-			],
-		})
-			.sort({ createdAt: -1 })
-			.limit(50)
+		const filters = [
+			{
+				$or: [
+					{ video: { $regex: /\S/ } },
+					{ mediaType: videoMimeTypePattern },
+					{ mediaUrl: videoUrlPattern },
+					{ image: videoUrlPattern },
+				],
+			},
+			{
+				$or: [
+					{ visibility: { $in: ["public", "followers"] } },
+					{ visibility: { $exists: false } },
+				],
+			},
+		];
+		if (cursor) {
+			filters.push({
+				$or: [
+					{ createdAt: { $lt: cursor.createdAt } },
+					{ createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+				],
+			});
+		}
+		const records = await Post.find({ author: { $in: followingIds }, $and: filters })
+			.sort({ createdAt: -1, _id: -1 })
+			.limit(FEED_PAGE_SIZE + 1)
 			.populate("author", "name username profilePicture");
+		const hasMore = records.length > FEED_PAGE_SIZE;
+		const pageRecords = records.slice(0, FEED_PAGE_SIZE);
 		const [posts, likedPostIds] = await Promise.all([
-			getEngagementCounts(records),
-			Like.distinct("post", { user: userId, post: { $in: records.map((post) => post._id) } }),
+			getEngagementCounts(pageRecords),
+			Like.distinct("post", { user: userId, post: { $in: pageRecords.map((post) => post._id) } }),
 		]);
 		const likedIds = new Set(likedPostIds.map(String));
 
@@ -270,6 +284,8 @@ router.get("/following", async (req, res) => {
 				likedByCurrentUser: likedIds.has(String(post._id)),
 			})),
 			postCount: posts.length,
+			hasMore,
+			nextCursor: hasMore ? encodeFeedCursor(pageRecords[pageRecords.length - 1]) : null,
 		});
 	} catch (error) {
 		console.error("Load following videos error:", error);
@@ -307,20 +323,32 @@ router.get("/", async (req, res) => {
 			privateAccount: true,
 			...privateAccountFilter,
 		});
-		const visibilityFilter = {
-			$and: [
-				publicAndFollowerPosts,
-				{ author: { $nin: privateAuthorIds } },
-			],
-		};
-		const records = await Post.find(visibilityFilter)
-			.sort({ createdAt: -1 })
-			.limit(50)
+		const cursor = decodeFeedCursor(req.query.cursor);
+		if (req.query.cursor && !cursor) {
+			return res.status(400).json({ message: "Invalid feed cursor." });
+		}
+		const filters = [
+			publicAndFollowerPosts,
+			{ author: { $nin: privateAuthorIds } },
+		];
+		if (cursor) {
+			filters.push({
+				$or: [
+					{ createdAt: { $lt: cursor.createdAt } },
+					{ createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+				],
+			});
+		}
+		const records = await Post.find({ $and: filters })
+			.sort({ createdAt: -1, _id: -1 })
+			.limit(FEED_PAGE_SIZE + 1)
 			.populate("author", "name username profilePicture");
+		const hasMore = records.length > FEED_PAGE_SIZE;
+		const pageRecords = records.slice(0, FEED_PAGE_SIZE);
 		const [posts, likedPostIds] = await Promise.all([
-			getEngagementCounts(records),
+			getEngagementCounts(pageRecords),
 			currentUserId
-				? Like.distinct("post", { user: currentUserId })
+				? Like.distinct("post", { user: currentUserId, post: { $in: pageRecords.map((post) => post._id) } })
 				: Promise.resolve([]),
 		]);
 		const likedIds = new Set(likedPostIds.map(String));
@@ -329,7 +357,12 @@ router.get("/", async (req, res) => {
 			likedByCurrentUser: likedIds.has(String(post._id)),
 		}));
 
-		res.json({ posts: personalizedPosts });
+		res.json({
+			posts: personalizedPosts,
+			postCount: personalizedPosts.length,
+			hasMore,
+			nextCursor: hasMore ? encodeFeedCursor(pageRecords[pageRecords.length - 1]) : null,
+		});
 	} catch (error) {
 		console.error("Load posts error:", error);
 		res.status(500).json({ message: "Unable to load posts." });
