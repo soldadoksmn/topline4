@@ -1,56 +1,100 @@
 package com.kisimoni.topline.ui.icons
 
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowRightAlt
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Reply
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.runtime.Composable
 import com.kisimoni.topline.R
 
+/**
+ * Centralized icon aliases used by Topline's Compose UI.
+ * Standard icons use Compose Material's extended icon set; the two brand
+ * marks remain app-owned vector assets.
+ */
 object BootstrapIcons {
-    @Composable fun Add() = ImageVector.vectorResource(R.drawable.bootstrap_plus_lg)
-    @Composable fun AddPhoto() = ImageVector.vectorResource(R.drawable.bootstrap_image)
-    @Composable fun ArrowBack() = ImageVector.vectorResource(R.drawable.bootstrap_arrow_left)
-    @Composable fun ArrowDropDown() = ImageVector.vectorResource(R.drawable.bootstrap_caret_down_fill)
-    @Composable fun ArrowRepeat() = ImageVector.vectorResource(R.drawable.bootstrap_arrow_repeat)
-    @Composable fun ArrowRightTurn() = ImageVector.vectorResource(R.drawable.bootstrap_arrow_90deg_right)
-    @Composable fun Bell() = ImageVector.vectorResource(R.drawable.bootstrap_bell)
-    @Composable fun BellFill() = ImageVector.vectorResource(R.drawable.bootstrap_bell_fill)
-    @Composable fun Bookmark() = ImageVector.vectorResource(R.drawable.bootstrap_bookmark)
-    @Composable fun BookmarkFill() = ImageVector.vectorResource(R.drawable.bootstrap_bookmark_fill)
-    @Composable fun Calendar() = ImageVector.vectorResource(R.drawable.bootstrap_calendar3)
-    @Composable fun CameraVideo() = ImageVector.vectorResource(R.drawable.bootstrap_camera_video)
-    @Composable fun ChatDotsFill() = ImageVector.vectorResource(R.drawable.bootstrap_chat_square_dots_fill)
-    @Composable fun ChatLeftText() = ImageVector.vectorResource(R.drawable.bootstrap_chat_left_text)
-    @Composable fun ChatLeftTextFill() = ImageVector.vectorResource(R.drawable.bootstrap_chat_left_text_fill)
-    @Composable fun ClockHistory() = ImageVector.vectorResource(R.drawable.bootstrap_clock_history)
-    @Composable fun Close() = ImageVector.vectorResource(R.drawable.bootstrap_x_lg)
-    @Composable fun Copy() = ImageVector.vectorResource(R.drawable.bootstrap_copy)
-    @Composable fun Delete() = ImageVector.vectorResource(R.drawable.bootstrap_trash)
-    @Composable fun Download() = ImageVector.vectorResource(R.drawable.bootstrap_download)
-    @Composable fun Edit() = ImageVector.vectorResource(R.drawable.bootstrap_pencil)
-    @Composable fun Email() = ImageVector.vectorResource(R.drawable.bootstrap_envelope)
-    @Composable fun Eye() = ImageVector.vectorResource(R.drawable.bootstrap_eye)
-    @Composable fun EyeSlash() = ImageVector.vectorResource(R.drawable.bootstrap_eye_slash)
-    @Composable fun Facebook() = ImageVector.vectorResource(R.drawable.facebook_f)
-    @Composable fun Gear() = ImageVector.vectorResource(R.drawable.bootstrap_gear)
-    @Composable fun Google() = ImageVector.vectorResource(R.drawable.google_g)
-    @Composable fun GridFill() = ImageVector.vectorResource(R.drawable.bootstrap_grid_3x3_gap_fill)
-    @Composable fun Heart() = ImageVector.vectorResource(R.drawable.bootstrap_heart)
-    @Composable fun HeartFill() = ImageVector.vectorResource(R.drawable.bootstrap_heart_fill)
-    @Composable fun HeartOutline() = ImageVector.vectorResource(R.drawable.bootstrap_heart)
-    @Composable fun HomeFill() = ImageVector.vectorResource(R.drawable.bootstrap_house_fill)
-    @Composable fun Image() = ImageVector.vectorResource(R.drawable.bootstrap_image)
-    @Composable fun Language() = ImageVector.vectorResource(R.drawable.bootstrap_translate)
-    @Composable fun Lock() = ImageVector.vectorResource(R.drawable.bootstrap_lock_fill)
-    @Composable fun Message() = ImageVector.vectorResource(R.drawable.bootstrap_chat_left_text)
-    @Composable fun PeopleFill() = ImageVector.vectorResource(R.drawable.bootstrap_people_fill)
-    @Composable fun Person() = ImageVector.vectorResource(R.drawable.bootstrap_person)
-    @Composable fun PersonFill() = ImageVector.vectorResource(R.drawable.bootstrap_person_fill)
-    @Composable fun Play() = ImageVector.vectorResource(R.drawable.bootstrap_play_fill)
-    @Composable fun Refresh() = ImageVector.vectorResource(R.drawable.bootstrap_arrow_clockwise)
-    @Composable fun Search() = ImageVector.vectorResource(R.drawable.bootstrap_search)
-    @Composable fun Send() = ImageVector.vectorResource(R.drawable.bootstrap_send_fill)
-    @Composable fun Settings() = ImageVector.vectorResource(R.drawable.bootstrap_gear)
-    @Composable fun Share() = ImageVector.vectorResource(R.drawable.bootstrap_reply_fill)
-    @Composable fun Sliders() = ImageVector.vectorResource(R.drawable.bootstrap_sliders)
-    @Composable fun Trash() = ImageVector.vectorResource(R.drawable.bootstrap_trash)
+    @Composable fun Add(): ImageVector = Icons.Filled.Add
+    @Composable fun AddPhoto(): ImageVector = Icons.Filled.AddPhotoAlternate
+    @Composable fun ArrowBack(): ImageVector = Icons.Filled.ArrowBack
+    @Composable fun ArrowDropDown(): ImageVector = Icons.Filled.ArrowDropDown
+    @Composable fun ArrowRepeat(): ImageVector = Icons.Filled.Autorenew
+    @Composable fun ArrowRightTurn(): ImageVector = Icons.Filled.ArrowRightAlt
+    @Composable fun Bell(): ImageVector = Icons.Filled.Notifications
+    @Composable fun BellFill(): ImageVector = Icons.Filled.NotificationsActive
+    @Composable fun Bookmark(): ImageVector = Icons.Filled.BookmarkBorder
+    @Composable fun BookmarkFill(): ImageVector = Icons.Filled.Bookmark
+    @Composable fun Calendar(): ImageVector = Icons.Filled.CalendarToday
+    @Composable fun CameraVideo(): ImageVector = Icons.Filled.Videocam
+    @Composable fun ChatDotsFill(): ImageVector = Icons.Filled.ChatBubble
+    @Composable fun ChatLeftText(): ImageVector = Icons.Filled.Chat
+    @Composable fun ChatLeftTextFill(): ImageVector = Icons.Filled.Chat
+    @Composable fun ClockHistory(): ImageVector = Icons.Filled.History
+    @Composable fun Close(): ImageVector = Icons.Filled.Close
+    @Composable fun Copy(): ImageVector = Icons.Filled.ContentCopy
+    @Composable fun Delete(): ImageVector = Icons.Filled.Delete
+    @Composable fun Download(): ImageVector = Icons.Filled.Download
+    @Composable fun Edit(): ImageVector = Icons.Filled.Edit
+    @Composable fun Email(): ImageVector = Icons.Filled.Email
+    @Composable fun Eye(): ImageVector = Icons.Filled.Visibility
+    @Composable fun EyeSlash(): ImageVector = Icons.Filled.VisibilityOff
+    @Composable fun Facebook(): ImageVector = ImageVector.vectorResource(R.drawable.facebook_f)
+    @Composable fun Gear(): ImageVector = Icons.Filled.Settings
+    @Composable fun Google(): ImageVector = ImageVector.vectorResource(R.drawable.google_g)
+    @Composable fun GridFill(): ImageVector = Icons.Filled.GridView
+    @Composable fun Heart(): ImageVector = Icons.Filled.Favorite
+    @Composable fun HeartFill(): ImageVector = Icons.Filled.Favorite
+    @Composable fun HeartOutline(): ImageVector = Icons.Filled.Favorite
+    @Composable fun HomeFill(): ImageVector = Icons.Filled.Home
+    @Composable fun Image(): ImageVector = Icons.Filled.AddPhotoAlternate
+    @Composable fun Language(): ImageVector = Icons.Filled.Translate
+    @Composable fun Lock(): ImageVector = Icons.Filled.Lock
+    @Composable fun Message(): ImageVector = Icons.Filled.Chat
+    @Composable fun PeopleFill(): ImageVector = Icons.Filled.People
+    @Composable fun Person(): ImageVector = Icons.Filled.Person
+    @Composable fun PersonFill(): ImageVector = Icons.Filled.Person
+    @Composable fun Play(): ImageVector = Icons.Filled.PlayArrow
+    @Composable fun Refresh(): ImageVector = Icons.Filled.Refresh
+    @Composable fun Search(): ImageVector = Icons.Filled.Search
+    @Composable fun Send(): ImageVector = Icons.Filled.Send
+    @Composable fun Settings(): ImageVector = Icons.Filled.Settings
+    @Composable fun Share(): ImageVector = Icons.Filled.Reply
+    @Composable fun Sliders(): ImageVector = Icons.Filled.Tune
+    @Composable fun Trash(): ImageVector = Icons.Filled.Delete
 }
