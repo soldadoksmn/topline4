@@ -1,4 +1,10 @@
 export const videoUrlPattern = /\/video\/upload\/|\.(3gp|m3u8|m4v|mkv|mov|mp4|webm)(?:[?#/]|$)/i;
+
+export const isCloudinaryStorageConfigured = (env = process.env) => Boolean(
+	env.CLOUDINARY_CLOUD_NAME?.trim() &&
+	env.CLOUDINARY_API_KEY?.trim() &&
+	env.CLOUDINARY_API_SECRET?.trim(),
+);
 export const videoMimeTypePattern = /^video(?:\/|$)/i;
 
 export const looksLikeVideoUrl = (url) =>
