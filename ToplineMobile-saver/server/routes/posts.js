@@ -262,7 +262,7 @@ router.get("/following", async (req, res) => {
 			filters.push({
 				$or: [
 					{ createdAt: { $lt: cursor.createdAt } },
-					{ createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+					{ createdAt: cursor.createdAt, _id: { $lt: new mongoose.Types.ObjectId(cursor.id) } },
 				],
 			});
 		}
@@ -328,6 +328,14 @@ router.get("/", async (req, res) => {
 			return res.status(400).json({ message: "Invalid feed cursor." });
 		}
 		const filters = [
+			{
+				$or: [
+					{ video: { $regex: /\S/ } },
+					{ mediaType: videoMimeTypePattern },
+					{ mediaUrl: videoUrlPattern },
+					{ image: videoUrlPattern },
+				],
+			},
 			publicAndFollowerPosts,
 			{ author: { $nin: privateAuthorIds } },
 		];
@@ -335,7 +343,7 @@ router.get("/", async (req, res) => {
 			filters.push({
 				$or: [
 					{ createdAt: { $lt: cursor.createdAt } },
-					{ createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+					{ createdAt: cursor.createdAt, _id: { $lt: new mongoose.Types.ObjectId(cursor.id) } },
 				],
 			});
 		}
