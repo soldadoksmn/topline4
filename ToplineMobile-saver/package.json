@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server/server.js",
+    "test": "node --test server/**/*.test.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1166.0",
